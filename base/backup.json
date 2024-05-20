@@ -1,0 +1,16 @@
+{
+  "none_reg": [],
+  "black_list": [],
+
+  "main_admin": 852663786,
+
+  "id": [934600550, 852663786],
+  "name": ["Артэм", "Мiкiта"],
+  "root": [false, true],
+  "limit": [[0.0063, 0.0067], [0.0059, 0.0065]],
+  "Question": {
+    "spam": [false, false],
+    "warning": [false, true]
+  },
+  "bool_actions": [[false, false, false, false, false], [false, false, false, false, false]]
+}
