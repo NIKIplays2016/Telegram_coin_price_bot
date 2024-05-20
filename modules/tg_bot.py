@@ -34,7 +34,7 @@ def registrate(message, base):
     base["none_reg"].remove(id)
     base["bool_actions"].append([False, False, False, False, False])
     if id > 0:
-        base["name"].append(message.from_user.username)
+        base["name"].append(message.from_user.user_name)
     elif id < 0:
         base["name"].append(message.chat.title)
     save(base)
@@ -142,7 +142,7 @@ def bot_main():
             message,
             text=f""" 
 'NOT price' - Это Telegram бот позволяющий следить за ценой на Not coin.
-v1.03
+v0.23 Beta
 
 Информация о цене берется с okx.com
 
@@ -262,17 +262,18 @@ okx API
         bot.reply_to(message, "Введите id и действие(0 - убрать из чс, 1 - добавить в чс) \n\nПример: \n1913991 1")
         save(base)
 
+
+
     @bot.message_handler(commands=['black_list'])
     def handle_start(message):
+        id = message.chat.id
         base = update_date()
 
-        if not check_admin(message, base):
-            bot.reply_to(message, "У вас нет прав для этой команды")
+        if not check_registrate(id, base):
+            bot.reply_to(message, text="Вы не авторизованны. \nВведите пароль")
             return 0
 
-        index = base["id"].index(id)
-
-        if not base["root"][index]:
+        if not check_admin(message, base):
             bot.reply_to(message, "У вас нет прав для этой команды")
             return 0
 
@@ -291,15 +292,6 @@ okx API
                     sms += f"\n {i}: Noname - {black_list[i]}"
             bot.reply_to(message, sms)
 
-    @bot.message_handler(commands=['start'])
-    def handle_start(message):
-        id = message.chat.id
-        base = update_date()
-        if id not in base["id"] and not id in base["none_reg"]:
-            bot.reply_to(message, text="Write password")
-            base["none_reg"].append(id)
-            save(base)
-            return 0
 
 
     @bot.message_handler(content_types=['text', 'document', 'audio', 'photo', 'video'])
@@ -310,12 +302,14 @@ okx API
 
         admin = check_admin(message, base)
 
+
         if id in base["black_list"] and id > 0 and not admin:
             bot.reply_to(message, f"Вы были заблокированы.😬 \nПоддержка: @picard_off")
             return 0
         elif id in base["black_list"] and id < 0 and not admin:
             bot.reply_to(message, f"Группа была заблокирована.😬 \nПоддержка: @picard_off")
             return 0
+
 
         if id not in base["id"] and not id in base["none_reg"]:
             bot.reply_to(message, text="Write password")
@@ -330,29 +324,30 @@ okx API
                 bot.reply_to(message, text="Не верный пароль")
                 bot.send_message(id, "Введите пароль заново")
             return 0
+
         else:
             index = base["id"].index(id)
+
 
 
         if base["bool_actions"][index][0]:
             try:
                 lim = message.text.split(" ")
                 lim[0], lim[1] = float(lim[0]), float(lim[1])
-                base["limit"][index][0]=lim[0]
-                base["limit"][index][1]=lim[1]
+                base["limit"][index][0] = lim[0]
+                base["limit"][index][1] = lim[1]
                 base["bool_actions"][index][0] = False
                 save(base)
             except:
-               bot.reply_to(message, "❌Неверный ввод❌ \nПопробуйте заново нажав на команду /command3")
-               base["bool_actions"][index][0] = False
+                bot.reply_to(message, "❌Неверный ввод❌ \nПопробуйте заново нажав на команду /command3")
+                base["bool_actions"][index][0] = False
 
         elif base["bool_actions"][index][1]:
             command = message.text.split(" ")
             try:
                 command[0], command[1] = int(command[0]), int(command[1])
-                bot.reply_to(message, "✅Пределы заданы успешно✅")
             except:
-                bot.reply_to(message, "❌Неверный ввод❌ \nПопробуйте заново нажав на команду /command3")
+                bot.reply_to(message, "Ошибка ввода")
                 base["bool_actions"][index][1] = False
                 save(base)
                 return 0
@@ -378,7 +373,7 @@ okx API
                 nid = int(message.text)
             except:
                 bot.reply_to(message, "Неверный ввод")
-                base["bool_actions"][index][2]= False
+                base["bool_actions"][index][2] = False
                 return 0
 
             try:
@@ -426,7 +421,8 @@ okx API
             save(base)
 
         else:
-            pass #bot.reply_to(message, "Действие не выбрано")
+            pass  # bot.reply_to(message, "Действие не выбрано")
 
+    bot.polling(none_stop=True, interval=0)
 
     bot.polling(none_stop=True, interval=0)
