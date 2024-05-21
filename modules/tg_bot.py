@@ -201,7 +201,7 @@ okx API
             return 0
 
         index = base["id"].index(id)
-        if not id == base["main_admin"]:
+        if not (id == base["main_admin"] or message.from_user.id == base["main_admin"]) :
             bot.reply_to(message, "У вас нет прав для этой команды. Это может делать только главный админ")
             return 0
 
@@ -219,7 +219,7 @@ okx API
             return 0
 
         index = base["id"].index(id)
-        if not id == base["main_admin"]:
+        if not (id == base["main_admin"] or message.from_user.id == base["main_admin"]) :
             bot.reply_to(message, "У вас нет прав для этой команды. Это может делать только главный админ")
             return 0
         base["bool_actions"][index][3] = True
