@@ -29,5 +29,3 @@ def check_price():
 if __name__ == "__main__":
     Thread(target=check_price).start()
     Thread(target=bot_main).start()
-
-
