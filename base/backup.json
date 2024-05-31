@@ -7,10 +7,15 @@
   "id": [934600550, 852663786],
   "name": ["Артэм", "Мiкiта"],
   "root": [false, true],
-  "limit": [[0.0063, 0.0067], [0.0059, 0.0065]],
-  "Question": {
-    "spam": [false, false],
-    "warning": [false, true]
+
+  "spam": {
+    "token": [[],[]],
+    "time" : []
   },
-  "bool_actions": [[false, false, false, false, false], [false, false, false, false, false]]
+  "warning": {
+    "token": [ [], ["NOT", "TON"] ],
+    "limit": [ [], [[0.006, 0.008], [6.0, 7.0]] ]
+  },
+
+  "bool_actions": [[false, false, false, false, false, false, false], [false, false, false, false, false, false, false]]
 }
