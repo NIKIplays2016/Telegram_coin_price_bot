@@ -13,11 +13,18 @@ def check_price():
     with open("base\static.json", "r") as file:
         token_base = json.load(file)
 
-    while True:
-        price = get_price(token_base)
-        base = update_date()
+    tick = 0
 
-        keys_list = list(price.keys())
+    while True:
+        base = update_date()
+        while True:
+            price = get_price(token_base)
+            keys_list = list(price.keys())
+
+            if len(keys_list) == len(token_base["tokens"]):
+                break
+
+
         print(price)
 
         for a in range(len(base["warning"]["token"])):
@@ -41,9 +48,12 @@ def check_price():
                     except KeyError:
                         print("*"*100+"\nMiss key\n"+"*"*100)
 
+
         for a in range(len(base["spam"]["token"])):
             user_id = base["id"][a]
-            if not user_id in base["black_list"]:
+            cooldown = base["spam"]["time"][a]
+            if not user_id in base["black_list"] and (tick % cooldown == 0):
+                print("ok")
                 sms = ""
                 try:
                     for i in range(len(base["spam"]["token"][a])):
@@ -52,6 +62,16 @@ def check_price():
 
                 except KeyError:
                     print("*"*100+"\nMiss key\n"+"*"*100)
+            else:
+                print(f"No cooldown {a}")
+
+        if tick >= 2880:
+            tick = 0
+        else:
+            tick += 1
+
+        print(f"Now tick: {tick}, check_price() go")
+
         """
         for a in token_base["tokens"]:
 
@@ -71,7 +91,7 @@ def check_price():
             print("OK")
         """
         sleep(60)
-
+        print(tick)
 
 if __name__ == "__main__":
     Thread(target=check_price).start()
