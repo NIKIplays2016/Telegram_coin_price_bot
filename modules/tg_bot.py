@@ -1,7 +1,7 @@
 import telebot
 import json
 
-token='7029691289:AAEdKrvWh9N9fdZ7v31oxpr6axTQBnGwdWo'
+token='you_key'
 bot=telebot.TeleBot(token)
 
 def update_date():
