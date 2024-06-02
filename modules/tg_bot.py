@@ -1,7 +1,7 @@
 import telebot
 import json
 
-token=''
+token='7029691289:AAEdKrvWh9N9fdZ7v31oxpr6axTQBnGwdWo'
 bot=telebot.TeleBot(token)
 
 def update_date():
@@ -29,12 +29,13 @@ def registrate(message, base):
     base["id"].append(id)
     base["root"].append(False)
     base["none_reg"].remove(id)
-    base["bool_actions"].append([False, False, False, False, False, False, False])
+    base["bool_actions"].append([False, False, False, False, False, False, False, False])
     base["spam"]["token"].append([])
+    base["spam"]["time"].append(1)
     base["warning"]["token"].append([])
     base["warning"]["limit"].append([])
     if id > 0:
-        base["name"].append(message.from_user.user_name)
+        base["name"].append(message.from_user.username)
     elif id < 0:
         base["name"].append(message.chat.title)
     save(base)
@@ -75,7 +76,7 @@ def bot_main():
 
 
     def reset_actions():
-        return [False, False, False, False, False, False, False]
+        return [False, False, False, False, False, False, False, False]
 
     @bot.message_handler(commands=['start'])
     def handle_start(message):
@@ -152,8 +153,24 @@ def bot_main():
         save(base)
 
 
+    @bot.message_handler(commands=['cooldown'])
+    def handle_start(message):
+        id = message.chat.id
+        base = update_date()
+        if not check_registrate(id, base):
+            bot.reply_to(message, text="Вы не авторизованны. \nВведите пароль")
+            return 0
 
 
+        if id in base["black_list"]:
+            bot.reply_to(message, f"Вы были заблокированы. \nПоддержка: @picard_off")
+            return 0
+
+        index = base["id"].index(id)
+        base["bool_actions"][index] = reset_actions()
+        base["bool_actions"][index][7] = True
+        bot.reply_to(message, f"Введите интервал в минутах между уведомленими \nот 1 до 2880")
+        save(base)
 
 
 
@@ -176,6 +193,7 @@ def bot_main():
 
         sms += "\n\nУведомления о цене:"
         sms += f"\n{base['spam']['token'][index]}"
+        sms += f"\n Переодичность: {base['spam']['time'][index]}м"
 
         sms += "\n\nУведомления при выходе монеты из ценового диапазона:\n"
         for i in range(len(base['warning']['token'][index])):
@@ -196,19 +214,21 @@ def bot_main():
             message,
             text=f""" 
 'Coin price' - Это Telegram бот позволяющий следить за ценой разных криптовалют.
-v0.50 Beta
+v0.93 Beta
 
 Информация о цене берется с okx.com
 
 Команды:
- /command1 - При вводе этой команды бот будет присылать каждую минуту цену на введенную вами монету, чтобы отписаться нужно повторно ввести команду.
+ /command1 - При вводе этой команды бот будет присылать каждую минуту цену(по умолчанию, чтобы изменить: /cooldown) на введенную вами монету, чтобы отписаться нужно повторно ввести команду.
 
  /command2 - При вводе этой команды бот предлагает вам ввести название монеты, верхний и нижний "предел" цены. 
 При переходе нижнего или верхнего предела цены, бот уведомит вас об этом. 
 
  /command3 - При вводе этой комманды нужно ввести название монеты, и вам больше не будут приходить уведомления о выходе цены этой манеты из ценового диапазона который вы указали ранее (/command2)  
 
+ /cooldown - "Эта команда позволяет изменить с какой частотой в минутах, бот будет присылать вам цену (от 1 минуты до 2880(2 дня))"
 
+ /about_me - Бот выведет информацию о вас
 @picard_off
 19.05.2024
 okx API 
@@ -539,6 +559,28 @@ okx API
                 bot.reply_to(message, f"Теперь вы будете получать рассылку цены на {sms}")
             base["bool_actions"][index][6] = False
             save(base)
+
+        elif base["bool_actions"][index][7] == True:
+            sms = message.text
+            try:
+                minutes = int(sms)
+            except:
+                bot.reply_to(message, f"Не верный ввод: {sms} \nПопробуйте заново")
+                base["bool_actions"][index][7] = False
+                save(base)
+                return 0
+
+            if not (minutes >= 1 and minutes <= 2880):
+                bot.reply_to(message, f"{minutes} минут не входит в интервал 1-2880\nПопробуйте заново")
+                base["bool_actions"][index][7] = False
+                save(base)
+                return 0
+
+            base["spam"]["time"][index] = minutes
+            base["bool_actions"][index][7] = False
+            bot.reply_to(message, f"Теперь уведомление о цене будет приходить вам каждые {minutes}м")
+            save(base)
+
 
 
     bot.polling(none_stop=True, interval=0)
